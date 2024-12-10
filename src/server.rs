@@ -1,6 +1,6 @@
+use crate::http::request::Request;
 use std::io::Read;
 use std::net::TcpListener;
-use crate::http::request::Request;
 
 pub struct Server {
     address: String,
@@ -21,7 +21,11 @@ impl Server {
                     let mut buffer = [0; 1024];
                     match stream.read(&mut buffer) {
                         Ok(size) => {
-                            println!("Received request: {}, size {}", String::from_utf8_lossy(&buffer[..size]), size);
+                            println!(
+                                "Received request: {}, size {}",
+                                String::from_utf8_lossy(&buffer[..size]),
+                                size
+                            );
                             match Request::try_from(&buffer[..]) {
                                 Ok(_request) => {}
                                 Err(e) => {

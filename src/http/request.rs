@@ -1,10 +1,9 @@
 use super::method::{Method, MethodError};
-use std::str;
-use std::str::Utf8Error;
 use std::convert::TryFrom;
 use std::error::Error;
 use std::fmt::{Debug, Display, Formatter};
-use std::str::FromStr;
+use std::str;
+use std::str::Utf8Error;
 
 pub struct Request<'buf> {
     path: &'buf str,
@@ -12,7 +11,7 @@ pub struct Request<'buf> {
     method: Method,
 }
 
-impl <'buf> TryFrom<&'buf [u8]> for Request<'buf> {
+impl<'buf> TryFrom<&'buf [u8]> for Request<'buf> {
     type Error = ParseError;
 
     // e.g. request: GET /search?name=abc HTTP1.1
@@ -22,8 +21,7 @@ impl <'buf> TryFrom<&'buf [u8]> for Request<'buf> {
             get_next_word(request_str).ok_or(ParseError::InvalidRequest)?;
         let (path_str, request_str) =
             get_next_word(request_str).ok_or(ParseError::InvalidRequest)?;
-        let (protocol_str, _) =
-            get_next_word(request_str).ok_or(ParseError::InvalidRequest)?;
+        let (protocol_str, _) = get_next_word(request_str).ok_or(ParseError::InvalidRequest)?;
 
         if protocol_str != "HTTP/1.1" {
             return Err(ParseError::InvalidProtocol);
@@ -32,7 +30,7 @@ impl <'buf> TryFrom<&'buf [u8]> for Request<'buf> {
         let method: Method = method_str.parse()?;
 
         let (query_string, path_str_without_query) = if let Some(i) = path_str.find('?') {
-            (Some(&path_str[i+1..]), &path_str[..i])
+            (Some(&path_str[i + 1..]), &path_str[..i])
         } else {
             (None, path_str)
         };
@@ -40,12 +38,9 @@ impl <'buf> TryFrom<&'buf [u8]> for Request<'buf> {
         Ok(Self {
             path: path_str_without_query,
             query_string,
-            method
+            method,
         })
-
     }
-
-
 }
 
 fn get_next_word(request: &str) -> Option<(&str, &str)> {
@@ -58,11 +53,15 @@ fn get_next_word(request: &str) -> Option<(&str, &str)> {
 }
 
 impl From<MethodError> for ParseError {
-    fn from(_: MethodError) -> Self { Self::InvalidMethod }
+    fn from(_: MethodError) -> Self {
+        Self::InvalidMethod
+    }
 }
 
-impl From<Utf8Error>  for ParseError {
-    fn from(_: Utf8Error) -> Self { Self::InvalidEncoding }
+impl From<Utf8Error> for ParseError {
+    fn from(_: Utf8Error) -> Self {
+        Self::InvalidEncoding
+    }
 }
 
 pub enum ParseError {
@@ -84,12 +83,15 @@ impl ParseError {
 }
 
 impl Display for ParseError {
-    fn fmt(&self, f: &mut Formatter) -> std::fmt::Result { write!(f, "{}", self.message()) }
+    fn fmt(&self, f: &mut Formatter) -> std::fmt::Result {
+        write!(f, "{}", self.message())
+    }
 }
 
-
 impl Debug for ParseError {
-    fn fmt(&self, f: &mut Formatter) -> std::fmt::Result { write!(f, "{}", self.message()) }
+    fn fmt(&self, f: &mut Formatter) -> std::fmt::Result {
+        write!(f, "{}", self.message())
+    }
 }
 
 impl Error for ParseError {}
